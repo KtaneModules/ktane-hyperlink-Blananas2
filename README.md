@@ -1,1 +1,1 @@
-ktane-hyperlink
+#[ModKit Wiki](../../wiki)
