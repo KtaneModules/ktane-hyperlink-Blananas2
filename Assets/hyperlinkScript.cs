@@ -45,6 +45,7 @@ public class hyperlinkScript : MonoBehaviour {
     public List<string> colorString = new List<string> { "0FF", "08F", "888", "F80", "FFF", "8F0", "00F", "FF8", "808", "F0F", "0F0", "F8F", "080", "FF0", "800", "8F8", "008", "880", "88F", "F08", "F88", "F00", "0F8", "000", "088", "8FF", "80F" };
 
     public List<int> index = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+    public List<string> encodings = new List<string> { "Alphabetic Position", "American Sign Language", "Binary", "Boozleglyphs", "Braille", "Cube Symbols", "\"Deaf\" Semaphore Telegraph", "Elder Futhark", "14-Segment Display", "Lombax", "Maritime Flags", "Moon Type", "Morse Code", "Necronomicon", "Ogham", "Pigpen", "Semaphore", "Standard", "Standard Galactic Alphabet", "SYNC-125 [3]", "Tap Code", "Unown", "Webdings", "Wingdings", "Wingdings 2", "Wingdings 3", "Zoni"}; 
 
     public List<string> alphabeticPosition = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26" };
     public List<string> binary = new List<string> { "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001", "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011", "10100", "10101", "10110", "10111", "11000", "11001", "11010" };
@@ -80,6 +81,12 @@ public class hyperlinkScript : MonoBehaviour {
         LettersToScrew();
 
         UpdateText();
+
+        for (int a = 0; a < 11; a++)
+        {
+            Debug.LogFormat("[The Hyperlink #{0}] Encoding {1}: '{2}' in {3} => '{4}' => {5}", moduleId, a + 1, screwList[a].Replace("\n", ""), encodings[index[a]], charList[a].Replace("\n", ""), selectedString[a] );
+        }
+        Debug.LogFormat("[The Hyperlink #{0}] Video https://www.youtube.com/watch?v={1} references {2}.", moduleId, selectedString, IDList.phrases[anchor + 1]);
     }
 
     void arrowPress (KMSelectable arrow)
@@ -165,6 +172,7 @@ public class hyperlinkScript : MonoBehaviour {
             {
                 if (selectedIcon == selectedID)
                 {
+                    Debug.LogFormat("[The Hyperlink #{0}] Icon for {1} selected, module solved.", moduleId, IDList.phrases[anchor + 1]);
                     Audio.PlaySoundAtTransform("solve", transform);
                     GetComponent<KMBombModule>().HandlePass();
                     moduleSolved = true;
@@ -188,6 +196,7 @@ public class hyperlinkScript : MonoBehaviour {
                 }
                 else
                 {
+                    Debug.LogFormat("[The Hyperlink #{0}] Icon for {1} selected, module striked.", moduleId, IDList.phrases[selectedIcon * 2 + 1]);
                     GetComponent<KMBombModule>().HandleStrike();
                     Square.AddInteractionPunch();
                     currentScreen = 0;

@@ -2146,6 +2146,34 @@ MonoBehaviour:
   - 8FF
   - 80F
   index: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a000000
+  encodings:
+  - Alphabetic Position
+  - American Sign Language
+  - Binary
+  - Boozleglyphs
+  - Braille
+  - Cube Symbols
+  - '"Deaf" Semaphore Telegraph'
+  - Elder Futhark
+  - 14-Segment Display
+  - Lombax
+  - Maritime Flags
+  - Moon Type
+  - Morse Code
+  - Necronomicon
+  - Ogham
+  - Pigpen
+  - Semaphore
+  - Standard
+  - Standard Galactic Alphabet
+  - SYNC-125 [3]
+  - Tap Code
+  - Unown
+  - Webdings
+  - Wingdings
+  - Wingdings 2
+  - Wingdings 3
+  - Zoni
   alphabeticPosition:
   - 1
   - 2
