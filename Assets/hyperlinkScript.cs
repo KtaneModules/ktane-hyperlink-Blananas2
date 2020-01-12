@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using KModkit;
 
@@ -93,12 +94,12 @@ public class hyperlinkScript : MonoBehaviour {
     {
         if (step == 0)
         {
-            Audio.PlaySoundAtTransform("button", transform);
-            arrow.AddInteractionPunch();
             if (arrow == Arrows[0])
             {
                 if (currentScreen != 0)
                 {
+                    Audio.PlaySoundAtTransform("button", transform);
+                    arrow.AddInteractionPunch();
                     currentScreen -= 1;
                 }
             }
@@ -106,6 +107,8 @@ public class hyperlinkScript : MonoBehaviour {
             {
                 if (currentScreen != 10)
                 {
+                    Audio.PlaySoundAtTransform("button", transform);
+                    arrow.AddInteractionPunch();
                     currentScreen += 1;
                 }
             }
@@ -158,6 +161,14 @@ public class hyperlinkScript : MonoBehaviour {
                 Square.AddInteractionPunch();
                 MainText.text = "";
                 TopNumber.text = "?";
+                if(currentScreen == 0)
+                {
+                    Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[0];
+                }
+                else if (currentScreen == 10)
+                {
+                    Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
+                }
                 Frame[0].GetComponent<Renderer>().material = OtherMats[2];
                 Frame[1].GetComponent<Renderer>().material = OtherMats[2];
                 Frame[2].GetComponent<Renderer>().material = OtherMats[2];
@@ -201,6 +212,7 @@ public class hyperlinkScript : MonoBehaviour {
                     Square.AddInteractionPunch();
                     currentScreen = 0;
                     TopNumber.text = " " + (currentScreen + 1) + " ";
+                    Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[1];
                     Back.GetComponent<Renderer>().material = OtherMats[2];
                     UpdateText();
                 }
@@ -561,5 +573,167 @@ public class hyperlinkScript : MonoBehaviour {
             screwString = screwString.Replace(" " + alphabet[p] + " ", " " + nonsense[p] + " ");
             screwString = screwString.Replace(" " + nonsense[p] + " ", " " + o[p] + " ");
         }
+    }
+
+    //twitch plays
+    private bool moveValid(string s)
+    {
+        string[] valids = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+        if (valids.Contains(s))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private bool listContains(string s)
+    {
+        for(int i = 0; i < IDList.phrases.Length; i++)
+        {
+            if (IDList.phrases[i].ToLower().Equals(s.ToLower()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    #pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} left/right (#) [Press the left/right arrow (optionally '#' times)] | !{0} submit <module> [Submits the specified module]";
+    #pragma warning restore 414
+
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        if (Regex.IsMatch(command, @"^\s*left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (!TopNumber.text.Equals("?"))
+            {
+                yield return null;
+                if (currentScreen == 0)
+                {
+                    yield return "sendtochaterror I cannot scroll to the left anymore!";
+                    yield break;
+                }
+                Arrows[0].OnInteract();
+            }
+            else
+            {
+                yield return "sendtochaterror I cannot scroll when in the submission page!";
+            }
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (!TopNumber.text.Equals("?"))
+            {
+                yield return null;
+                if (currentScreen == 10)
+                {
+                    yield return "sendtochaterror I cannot scroll to the right anymore!";
+                    yield break;
+                }
+                Arrows[1].OnInteract();
+            }
+            else
+            {
+                yield return "sendtochaterror I cannot scroll when in the submission page!";
+            }
+            yield break;
+        }
+        string[] parameters = command.Split(' ');
+        if (Regex.IsMatch(parameters[0], @"^\s*left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (!TopNumber.text.Equals("?"))
+            {
+                if (parameters.Length == 2)
+                {
+                    if (moveValid(parameters[1]))
+                    {
+                        yield return null;
+                        int temp = 0;
+                        int.TryParse(parameters[1], out temp);
+                        for (int i = 0; i < temp; i++)
+                        {
+                            if (parameters[0].ToLower().Equals("left"))
+                            {
+                                if (currentScreen == 0)
+                                {
+                                    yield break;
+                                }
+                                Arrows[0].OnInteract();
+                            }
+                            else if (parameters[0].ToLower().Equals("right"))
+                            {
+                                if (currentScreen == 10)
+                                {
+                                    yield break;
+                                }
+                                Arrows[1].OnInteract();
+                            }
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else
+                    {
+                        yield return "sendtochaterror '" + parameters[1] + "' is not a valid number! Numbers 1-10 are valid for scrolling.";
+                    }
+                }
+            }
+            else
+            {
+                yield return "sendtochaterror I cannot scroll when in the submission page!";
+            }
+            yield break;
+        }
+        if (Regex.IsMatch(parameters[0], @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (parameters.Length >= 2)
+            {
+                yield return null;
+                if (!TopNumber.text.Equals("?"))
+                {
+                    Square.OnInteract();
+                }
+                string module = "";
+                for (int i = 1; i < parameters.Length; i++)
+                {
+                    module += parameters[i] + " ";
+                }
+                module = module.Trim();
+                module = module.ToLower();
+                if (IDList.phrases[anchor + 1].ToLower().Equals(module))
+                {
+                    yield return "solve";
+                }
+                else if(listContains(module))
+                {
+                    yield return "strike";
+                }
+                string modname = Back.GetComponent<Renderer>().material.name.ToLower();
+                modname = modname.Replace(" (instance)", "");
+                int rando = UnityEngine.Random.Range(0, 2);
+                int counter = 0;
+                while (!module.Equals(modname))
+                {
+                    Arrows[rando].OnInteract();
+                    modname = Back.GetComponent<Renderer>().material.name.ToLower();
+                    modname = modname.Replace(" (instance)", "");
+                    yield return new WaitForSeconds(0.05f);
+                    counter++;
+                    if(counter == 121)
+                    {
+                        yield return "sendtochaterror '"+module+"' is not a valid module name!";
+                        yield break;
+                    }
+                }
+                Square.OnInteract();
+            }
+        }
+    }
+
+    //tp force solve handler
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        yield return ProcessTwitchCommand("submit "+ IDList.phrases[anchor + 1]);
     }
 }
