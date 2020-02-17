@@ -471,6 +471,9 @@ public class hyperlinkScript : MonoBehaviour {
                 case 15:
                     LetterSwitch("acegikmoqbdfhjlnprsuwytvxz", j);
                     break;
+		case 16:
+                    LetterSwitch("ABCDEFGHIJKLM\\OPQRSTUVWXYZ", j);
+                    break;
                 case 19:
                     BiggerSwitch(6, j);
                     break;
