@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +32,10 @@ public class hyperlinkScript : MonoBehaviour {
     int moduleId;
     private bool moduleSolved;
 
+    private Coroutine buttonHold;
+	private bool holding = false;
+    private int btn = 0;
+
     int selectedID = 0;
     int anchor = 0;
     int currentScreen = 0;
@@ -64,6 +68,7 @@ public class hyperlinkScript : MonoBehaviour {
         foreach (KMSelectable arrow in Arrows) {
             KMSelectable pressedArrow = arrow;
             arrow.OnInteract += delegate () { arrowPress(pressedArrow); return false; };
+            arrow.OnInteractEnded += delegate { arrowRelease(pressedArrow); };
         }
 
         Square.OnInteract += delegate () { squarePress(); return false; };
@@ -138,15 +143,44 @@ public class hyperlinkScript : MonoBehaviour {
             if (arrow == Arrows[0])
             {
                 selectedIcon = (selectedIcon - 1);
+                btn = 0;
             }
             else if (arrow == Arrows[1])
             {
                 selectedIcon = (selectedIcon + 1);
+                btn = 1;
             }
 
             if (selectedIcon == -1) { selectedIcon = 120; }
             if (selectedIcon == 121) { selectedIcon = 0; }
             Back.GetComponent<Renderer>().material = IconMats[selectedIcon];
+            buttonHold = StartCoroutine(HoldChecker());
+        }
+    }
+
+    void arrowRelease (KMSelectable arrow) {
+        if (step == 1) {
+            StopCoroutine(buttonHold);
+        }
+    }
+
+    IEnumerator HoldChecker()
+	{
+		yield return new WaitForSeconds(.4f);
+        holding = true;
+        if (step == 1 && holding) {
+            backHere:
+            Audio.PlaySoundAtTransform("button", transform);
+            if (btn == 0) {
+                selectedIcon = (selectedIcon - 1);
+            } else {
+                selectedIcon = (selectedIcon + 1);
+            }
+            if (selectedIcon == -1) { selectedIcon = 120; }
+            if (selectedIcon == 121) { selectedIcon = 0; }
+            Back.GetComponent<Renderer>().material = IconMats[selectedIcon];
+            yield return new WaitForSeconds(0.075f);
+            goto backHere;
         }
     }
 
@@ -591,13 +625,16 @@ public class hyperlinkScript : MonoBehaviour {
 
     private bool listContains(string s)
     {
-        for(int i = 0; i < IDList.phrases.Length; i++)
+        List<string> names = new List<string>();
+        for (int i = 0; i < IDList.phrases.Length; i++)
         {
-            if (IDList.phrases[i].ToLower().Equals(s.ToLower()))
+            if (i % 2 != 0)
             {
-                return true;
+                names.Add(IDList.phrases[i].ToLower());
             }
         }
+        if (names.Contains(s))
+            return true;
         return false;
     }
 
@@ -618,6 +655,7 @@ public class hyperlinkScript : MonoBehaviour {
                     yield break;
                 }
                 Arrows[0].OnInteract();
+                Arrows[0].OnInteractEnded();
             }
             else
             {
@@ -636,6 +674,7 @@ public class hyperlinkScript : MonoBehaviour {
                     yield break;
                 }
                 Arrows[1].OnInteract();
+                Arrows[1].OnInteractEnded();
             }
             else
             {
@@ -664,6 +703,7 @@ public class hyperlinkScript : MonoBehaviour {
                                     yield break;
                                 }
                                 Arrows[0].OnInteract();
+                                Arrows[0].OnInteractEnded();
                             }
                             else if (parameters[0].ToLower().Equals("right"))
                             {
@@ -672,6 +712,7 @@ public class hyperlinkScript : MonoBehaviour {
                                     yield break;
                                 }
                                 Arrows[1].OnInteract();
+                                Arrows[1].OnInteractEnded();
                             }
                             yield return new WaitForSeconds(0.1f);
                         }
@@ -704,32 +745,79 @@ public class hyperlinkScript : MonoBehaviour {
                 }
                 module = module.Trim();
                 module = module.ToLower();
-                if (IDList.phrases[anchor + 1].ToLower().Equals(module))
+                if (!listContains(module))
                 {
-                    yield return "solve";
-                }
-                else if(listContains(module))
-                {
-                    yield return "strike";
-                }
-                string modname = Back.GetComponent<Renderer>().material.name.ToLower();
-                modname = modname.Replace(" (instance)", "");
-                int rando = UnityEngine.Random.Range(0, 2);
-                int counter = 0;
-                while (!module.Equals(modname))
-                {
-                    Arrows[rando].OnInteract();
-                    modname = Back.GetComponent<Renderer>().material.name.ToLower();
+                    string modname = Back.GetComponent<Renderer>().material.name.ToLower();
                     modname = modname.Replace(" (instance)", "");
-                    yield return new WaitForSeconds(0.05f);
-                    counter++;
-                    if(counter == 121)
+                    int rando = UnityEngine.Random.Range(0, 2);
+                    int counter = 0;
+                    while (!module.Equals(modname))
                     {
-                        yield return "sendtochaterror '"+module+"' is not a valid module name!";
-                        yield break;
+                        Arrows[rando].OnInteract();
+                        Arrows[rando].OnInteractEnded();
+                        modname = Back.GetComponent<Renderer>().material.name.ToLower();
+                        modname = modname.Replace(" (instance)", "");
+                        yield return new WaitForSeconds(0.05f);
+                        counter++;
+                        if (counter == 121)
+                        {
+                            yield return "sendtochaterror '" + module + "' is not a valid module name!";
+                            yield break;
+                        }
                     }
                 }
-                Square.OnInteract();
+                else
+                {
+                    int ctleft = 0;
+                    int ctright = 0;
+                    int curindex = 121;
+                    while (!module.Equals(IDList.phrases[curindex].ToLower()))
+                    {
+                        curindex -= 2;
+                        if (curindex < 1)
+                            curindex = 245;
+                        ctleft++;
+                    }
+                    curindex = 121;
+                    while (!module.Equals(IDList.phrases[curindex].ToLower()))
+                    {
+                        curindex += 2;
+                        if (curindex > 245)
+                            curindex = 1;
+                        ctright++;
+                    }
+                    if (ctleft > ctright)
+                    {
+                        for (int i = 0; i < ctright; i++)
+                        {
+                            Arrows[1].OnInteract();
+                            Arrows[1].OnInteractEnded();
+                            yield return new WaitForSeconds(0.05f);
+                        }
+                    }
+                    else if (ctleft < ctright)
+                    {
+                        for (int i = 0; i < ctleft; i++)
+                        {
+                            Arrows[0].OnInteract();
+                            Arrows[0].OnInteractEnded();
+                            yield return new WaitForSeconds(0.05f);
+                        }
+                    }
+                    else
+                    {
+                        int rando = UnityEngine.Random.Range(0, 2);
+                        for (int i = 0; i < ctleft; i++)
+                        {
+                            Arrows[rando].OnInteract();
+                            Arrows[rando].OnInteractEnded();
+                            yield return new WaitForSeconds(0.05f);
+                        }
+                    }
+                    if (ctleft == 0 && ctright == 0)
+                        yield return new WaitForSeconds(0.05f);
+                    Square.OnInteract();
+                }
             }
         }
     }
