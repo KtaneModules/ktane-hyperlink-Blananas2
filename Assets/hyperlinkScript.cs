@@ -28,7 +28,7 @@ public class hyperlinkScript : MonoBehaviour {
 
     //Logging
     static int moduleIdCounter = 1;
-    public int moduleId;
+    private int moduleId;
     public bool moduleSolved;
 
     private Coroutine buttonHold;
@@ -40,28 +40,28 @@ public class hyperlinkScript : MonoBehaviour {
     int anchor;
     int currentScreen;
     string selectedString = "";
-    public List<string> charList = new List<string>();
-    public List<string> screwList = new List<string>();
+    private List<string> charList = new List<string>();
+    private List<string> screwList = new List<string>();
     string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     string nonsense = "⅓⅔⅛⅜⅝⅞ↄ←↑→↓↔↨∂∆∏∑−∕∙√∞∟∩∫≈";
     string screwString = "";
     string connectionLink;
     int step;
     int selectedIcon = 60;
-    public List<string> colorString = new List<string> { "0FF", "08F", "888", "F80", "FFF", "8F0", "00F", "FF8", "808", "F0F", "0F0", "F8F", "080", "FF0", "800", "8F8", "008", "880", "88F", "F08", "F88", "F00", "0F8", "000", "088", "8FF", "80F" };
+    private List<string> colorString = new List<string> { "0FF", "08F", "888", "F80", "FFF", "8F0", "00F", "FF8", "808", "F0F", "0F0", "F8F", "080", "FF0", "800", "8F8", "008", "880", "88F", "F08", "F88", "F00", "0F8", "000", "088", "8FF", "80F" };
 
-    public List<int> index = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
-    public List<string> encodings = new List<string> { "Alphabetic Position", "American Sign Language", "Binary", "Boozleglyphs", "Braille", "Cube Symbols", "\"Deaf\" Semaphore Telegraph", "Elder Futhark", "14-Segment Display", "Lombax", "Maritime Flags", "Moon Type", "Morse Code", "Necronomicon", "Ogham", "Pigpen", "Semaphore", "Standard", "Standard Galactic Alphabet", "SYNC-125 [3]", "Tap Code", "Unown", "Webdings", "Wingdings", "Wingdings 2", "Wingdings 3", "Zoni"};
+    private List<int> index = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+    private List<string> encodings = new List<string> { "Alphabetic Position", "American Sign Language", "Binary", "Boozleglyphs", "Braille", "Cube Symbols", "\"Deaf\" Semaphore Telegraph", "Elder Futhark", "14-Segment Display", "Lombax", "Maritime Flags", "Moon Type", "Morse Code", "Necronomicon", "Ogham", "Pigpen", "Semaphore", "Standard", "Standard Galactic Alphabet", "SYNC-125 [3]", "Tap Code", "Unown", "Webdings", "Wingdings", "Wingdings 2", "Wingdings 3", "Zoni"};
 
-    public List<string> alphabeticPosition = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26" };
-    public List<string> binary = new List<string> { "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001", "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011", "10100", "10101", "10110", "10111", "11000", "11001", "11010" };
-    public List<string> elderFuthark = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "cc", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "uu", "x", "y", "z" };
-    public List<string> morse = new List<string> { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.." };
-    public List<string> ogham = new List<string> { "┼", "┬", "╨╨", "╨", "╫╫", "┬┬┬", "//", "┴", "╫┼╫", "#", "₩", "╥", "/", "╥┬╥", "╫", "═", "╨┴╨", "/////", "╥╥", "┴┴┴", "┼┼┼", "□", "◊", "X", "///", "////" };
-    public List<string> sync = new List<string> { "a", "p'", "C", "t'", "e", "f", "k'", "h", "i", "j'", "k", "r'", "m", "n", "o", "p", "?", "r", "s", "t", "u", "f'", "w", "!", "y", "s'" };
-    public List<string> tapCode = new List<string> { "11", "12", "13", "14", "15", "21", "22", "23", "24", "25", "66", "31", "32", "33", "34", "35", "41", "42", "43", "44", "45", "51", "52", "53", "54", "55" };
+    private List<string> alphabeticPosition = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26" };
+    private List<string> binary = new List<string> { "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001", "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011", "10100", "10101", "10110", "10111", "11000", "11001", "11010" };
+    private List<string> elderFuthark = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "cc", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "uu", "x", "y", "z" };
+    private List<string> morse = new List<string> { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.." };
+    private List<string> ogham = new List<string> { "┼", "┬", "╨╨", "╨", "╫╫", "┬┬┬", "//", "┴", "╫┼╫", "#", "₩", "╥", "/", "╥┬╥", "╫", "═", "╨┴╨", "/////", "╥╥", "┴┴┴", "┼┼┼", "□", "◊", "X", "///", "////" };
+    private List<string> sync = new List<string> { "a", "p'", "C", "t'", "e", "f", "k'", "h", "i", "j'", "k", "r'", "m", "n", "o", "p", "?", "r", "s", "t", "u", "f'", "w", "!", "y", "s'" };
+    private List<string> tapCode = new List<string> { "11", "12", "13", "14", "15", "21", "22", "23", "24", "25", "66", "31", "32", "33", "34", "35", "41", "42", "43", "44", "45", "51", "52", "53", "54", "55" };
 
-    public List<string> holdingList = new List<string>();
+    private List<string> holdingList = new List<string>();
 
     private hyperlinkWebSocketManager _webSocketManager;
 
@@ -208,7 +208,7 @@ public class hyperlinkScript : MonoBehaviour {
             step = 0;
             UpdateText();
         }
-        ConnectionLED.material = error ? OtherMats[6] : OtherMats[4];
+        ConnectionLED.material = error ? OtherMats[3] : OtherMats[7];
         connectionSuccessful = !error;
         charList.Clear();
         screwList.Clear();
@@ -242,7 +242,7 @@ public class hyperlinkScript : MonoBehaviour {
     public IEnumerator ConnectionLost()
     {
         Debug.LogFormat("[The Hyperlink #{0}] The module has lost its connection to the server and will now use the youtube link instead", moduleId);
-        ConnectionLED.material = OtherMats[6];
+        ConnectionLED.material = OtherMats[7];
         StartCoroutine(ConnectionError());
         yield return null;
     }
