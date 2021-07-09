@@ -1,10 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using KModkit;
 
 public class hyperlinkScript : MonoBehaviour {
 
@@ -14,6 +12,7 @@ public class hyperlinkScript : MonoBehaviour {
     public KMSelectable[] Arrows;
     public KMSelectable Square;
     public GameObject Circle;
+    public MeshRenderer ConnectionLED;
     public TextMesh TopNumber;
     public TextMesh MainText;
     public GameObject Back;
@@ -29,23 +28,25 @@ public class hyperlinkScript : MonoBehaviour {
 
     //Logging
     static int moduleIdCounter = 1;
-    int moduleId;
-    private bool moduleSolved;
+    public int moduleId;
+    public bool moduleSolved;
 
     private Coroutine buttonHold;
-	private bool holding = false;
-    private int btn = 0;
+	private bool holding;
+    private bool interactable;
+    private int btn;
 
-    int selectedID = 0;
-    int anchor = 0;
-    int currentScreen = 0;
+    int selectedID;
+    int anchor;
+    int currentScreen;
     string selectedString = "";
-    public List<string> charList = new List<string> { };
-    public List<string> screwList = new List<string> { };
+    public List<string> charList = new List<string>();
+    public List<string> screwList = new List<string>();
     string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     string nonsense = "⅓⅔⅛⅜⅝⅞ↄ←↑→↓↔↨∂∆∏∑−∕∙√∞∟∩∫≈";
     string screwString = "";
-    int step = 0;
+    string connectionLink;
+    int step;
     int selectedIcon = 60;
     public List<string> colorString = new List<string> { "0FF", "08F", "888", "F80", "FFF", "8F0", "00F", "FF8", "808", "F0F", "0F0", "F8F", "080", "FF0", "800", "8F8", "008", "880", "88F", "F08", "F88", "F00", "0F8", "000", "088", "8FF", "80F" };
 
@@ -60,43 +61,53 @@ public class hyperlinkScript : MonoBehaviour {
     public List<string> sync = new List<string> { "a", "p'", "C", "t'", "e", "f", "k'", "h", "i", "j'", "k", "r'", "m", "n", "o", "p", "?", "r", "s", "t", "u", "f'", "w", "!", "y", "s'" };
     public List<string> tapCode = new List<string> { "11", "12", "13", "14", "15", "21", "22", "23", "24", "25", "66", "31", "32", "33", "34", "35", "41", "42", "43", "44", "45", "51", "52", "53", "54", "55" };
 
-    public List<string> holdingList = new List<string> { };
+    public List<string> holdingList = new List<string>();
+
+    private hyperlinkWebSocketManager _webSocketManager;
+
+    private bool connectionSuccessful;
+    
+    private const int numberOfLetters = 11;
 
     void Awake () {
         moduleId = moduleIdCounter++;
 
         foreach (KMSelectable arrow in Arrows) {
             KMSelectable pressedArrow = arrow;
-            arrow.OnInteract += delegate () { arrowPress(pressedArrow); return false; };
-            arrow.OnInteractEnded += delegate { arrowRelease(pressedArrow); };
+            arrow.OnInteract += delegate { arrowPress(pressedArrow); return false; };
+            arrow.OnInteractEnded += arrowRelease;
         }
 
-        Square.OnInteract += delegate () { squarePress(); return false; };
+        Square.OnInteract += delegate { squarePress(); return false; };
 
     }
 
     // Use this for initialization
     void Start () {
-	    selectedID = UnityEngine.Random.Range(0, 121);
+	    selectedID = Random.Range(0, 121);
         anchor = 2 * selectedID;
-        selectedString = IDList.phrases[anchor];
-        StringToLetters(selectedString);
+        _webSocketManager = new hyperlinkWebSocketManager(this, GetData(selectedID));
+    }
 
-        index.Shuffle();
-
-        LettersToScrew();
-
-        UpdateText();
-
-        for (int a = 0; a < 11; a++)
+    private string GetData(int selectedId)
+    {
+        var link = new List<char>();
+        var redirect = IDList.phrases[selectedId * 2];
+        for (var i = 0; i < numberOfLetters; ++i)
         {
-            Debug.LogFormat("[The Hyperlink #{0}] Encoding {1}: '{2}' in {3} => '{4}' => {5}", moduleId, a + 1, screwList[a].Replace("\n", ""), encodings[index[a]], charList[a].Replace("\n", ""), selectedString[a] );
+            link.Add("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"[Random.Range(0, 54)]);
         }
-        Debug.LogFormat("[The Hyperlink #{0}] Video https://www.youtube.com/watch?v={1} references {2}.", moduleId, selectedString, IDList.phrases[anchor + 1]);
+
+        connectionLink = new string(link.ToArray());
+        return string.Format("Connection|Addsocket|{0}|{1}", connectionLink, redirect);
     }
 
     void arrowPress (KMSelectable arrow)
     {
+        if (!interactable)
+        {
+            return;
+        }
         if (step == 0)
         {
             if (arrow == Arrows[0])
@@ -158,10 +169,82 @@ public class hyperlinkScript : MonoBehaviour {
         }
     }
 
-    void arrowRelease (KMSelectable arrow) {
+    void arrowRelease () {
+        if (!interactable)
+        {
+            return;
+        }
         if (step == 1) {
             StopCoroutine(buttonHold);
         }
+    }
+    
+    private void OnDestroy()
+    {
+        _webSocketManager.Stop();
+    }
+
+    public IEnumerator ConnectionError()
+    {
+        Startmod(true);
+        yield return null;
+    }
+    
+    public IEnumerator ConnectionReady()
+    {
+        Startmod(false);
+        yield return null;
+    }
+
+    private void Startmod(bool error)
+    {
+        //Start the module
+        if (step == 1 && error)
+        {
+            currentScreen = 0;
+            TopNumber.text = " " + (currentScreen + 1) + " ";
+            Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[1];
+            Back.GetComponent<Renderer>().material = OtherMats[2];
+            step = 0;
+            UpdateText();
+        }
+        ConnectionLED.material = error ? OtherMats[6] : OtherMats[4];
+        connectionSuccessful = !error;
+        charList.Clear();
+        screwList.Clear();
+        holdingList.Clear();
+        selectedString = error ? IDList.phrases[anchor] : connectionLink;
+        StringToLetters(selectedString);
+
+        index.Shuffle();
+
+        LettersToScrew();
+
+        UpdateText();
+
+        Debug.LogFormat(
+            error
+                ? "[The Hyperlink #{0}] The module failed to connect the the server, use the youtube link instead."
+                : "[The Hyperlink #{0}] The module connected to the server.", moduleId);
+        for (int a = 0; a < 11; a++)
+        {
+            Debug.LogFormat("[The Hyperlink #{0}] Encoding {1}: '{2}' in {3} => '{4}' => {5}", moduleId, a + 1, screwList[a].Replace("\n", ""), encodings[index[a]], charList[a].Replace("\n", ""), selectedString[a] );
+        }
+        Debug.LogFormat("[The Hyperlink #{0}] Video {3}{1} references {2}.", moduleId, selectedString, IDList.phrases[anchor + 1], error ? "https://www.youtube.com/watch?v=" : "https://marksam32.github.io/hl/?link=");
+        interactable = true;
+        Circle.GetComponent<MeshRenderer>().material = OtherMats[0];
+        Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
+        Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[1];
+        currentScreen = 0;
+        TopNumber.text = "1";
+    }
+
+    public IEnumerator ConnectionLost()
+    {
+        Debug.LogFormat("[The Hyperlink #{0}] The module has lost its connection to the server and will now use the youtube link instead", moduleId);
+        ConnectionLED.material = OtherMats[6];
+        StartCoroutine(ConnectionError());
+        yield return null;
     }
 
     IEnumerator HoldChecker()
@@ -186,6 +269,10 @@ public class hyperlinkScript : MonoBehaviour {
 
     void squarePress ()
     {
+        if (!interactable)
+        {
+            return;
+        }
         if (moduleSolved == false)
         {
             step = (step + 1) % 2;
@@ -220,10 +307,15 @@ public class hyperlinkScript : MonoBehaviour {
                     Debug.LogFormat("[The Hyperlink #{0}] Icon for {1} selected, module solved.", moduleId, IDList.phrases[anchor + 1]);
                     Audio.PlaySoundAtTransform("solve", transform);
                     GetComponent<KMBombModule>().HandlePass();
+                    if (connectionSuccessful)
+                    {
+                        _webSocketManager.Solve();
+                    }
                     moduleSolved = true;
                     Square.AddInteractionPunch();
                     step = 999;
                     TopNumber.text = "   ";
+                    ConnectionLED.material = OtherMats[2];
                     Frame[0].GetComponent<Renderer>().material = OtherMats[2];
                     Frame[1].GetComponent<Renderer>().material = OtherMats[2];
                     Frame[2].GetComponent<Renderer>().material = OtherMats[2];
@@ -397,82 +489,80 @@ public class hyperlinkScript : MonoBehaviour {
             RGB[2].GetComponent<Renderer>().material = OtherMats[8];
         }
 
-        if (charList[currentScreen].Length == 3) {
-            MainText.GetComponent<TextMesh>().fontSize = 288;
-        } else
-        {
-            MainText.GetComponent<TextMesh>().fontSize = 144;
-        }
+        MainText.GetComponent<TextMesh>().fontSize = charList[currentScreen].Length == 3 ? 288 : 144;
     }
 
     void StringToLetters (string s)
     {
         for (int i = 0; i < 11; i++)
         {
-            if (s[i] == '0') { charList.Add(" Z E \n\n R O "); };
-            if (s[i] == '1') { charList.Add(" O N \n\n E "); };
-            if (s[i] == '2') { charList.Add(" T W \n\n O "); };
-            if (s[i] == '3') { charList.Add(" T H \n\n R \n\n E E "); };
-            if (s[i] == '4') { charList.Add(" F O \n\n U R "); };
-            if (s[i] == '5') { charList.Add(" F I \n\n V E "); };
-            if (s[i] == '6') { charList.Add(" S I \n\n X "); };
-            if (s[i] == '7') { charList.Add(" S E \n\n V \n\n E N "); };
-            if (s[i] == '8') { charList.Add(" E I \n\n G \n\n H T "); };
-            if (s[i] == '9') { charList.Add(" N I \n\n N E "); };
-            if (s[i] == 'A') { charList.Add(" A L \n\n F A "); };
-            if (s[i] == 'B') { charList.Add(" B R \n\n A \n\n V O "); };
-            if (s[i] == 'C') { charList.Add(" C H \n\n A R L \n\n I E "); };
-            if (s[i] == 'D') { charList.Add(" D E \n\n L \n\n T A "); };
-            if (s[i] == 'E') { charList.Add(" E C \n\n H O "); };
-            if (s[i] == 'F') { charList.Add(" F O \n\n X T R \n\n O T "); };
-            if (s[i] == 'G') { charList.Add(" G O \n\n L F "); };
-            if (s[i] == 'H') { charList.Add(" H O \n\n T \n\n E L "); };
-            if (s[i] == 'I') { charList.Add(" I N \n\n D \n\n I A "); };
-            if (s[i] == 'J') { charList.Add(" J U \n\n L I E \n\n T T "); };
-            if (s[i] == 'K') { charList.Add(" K I \n\n L O "); };
-            if (s[i] == 'L') { charList.Add(" L I \n\n M A "); };
-            if (s[i] == 'M') { charList.Add(" M I \n\n K E "); };
-            if (s[i] == 'N') { charList.Add(" N O V \n\n E M \n\n B E R "); };
-            if (s[i] == 'O') { charList.Add(" O S \n\n C \n\n A R "); };
-            if (s[i] == 'P') { charList.Add(" P A \n\n P A "); };
-            if (s[i] == 'Q') { charList.Add(" Q U \n\n E B \n\n E C "); };
-            if (s[i] == 'R') { charList.Add(" R O \n\n M \n\n E O "); };
-            if (s[i] == 'S') { charList.Add(" S I \n\n E R \n\n R A "); };
-            if (s[i] == 'T') { charList.Add(" T A \n\n N \n\n G O "); };
-            if (s[i] == 'U') { charList.Add(" U N \n\n I F O \n\n R M "); };
-            if (s[i] == 'V') { charList.Add(" V I \n\n C T \n\n O R "); };
-            if (s[i] == 'W') { charList.Add(" W H \n\n I S K \n\n E Y "); };
-            if (s[i] == 'X') { charList.Add(" X R \n\n A Y "); };
-            if (s[i] == 'Y') { charList.Add(" Y A \n\n N K \n\n E E "); };
-            if (s[i] == 'Z') { charList.Add(" Z U \n\n L U "); };
-            if (s[i] == 'a') { charList.Add(" A "); };
-            if (s[i] == 'b') { charList.Add(" B "); };
-            if (s[i] == 'c') { charList.Add(" C "); };
-            if (s[i] == 'd') { charList.Add(" D "); };
-            if (s[i] == 'e') { charList.Add(" E "); };
-            if (s[i] == 'f') { charList.Add(" F "); };
-            if (s[i] == 'g') { charList.Add(" G "); };
-            if (s[i] == 'h') { charList.Add(" H "); };
-            if (s[i] == 'i') { charList.Add(" I "); };
-            if (s[i] == 'j') { charList.Add(" J "); };
-            if (s[i] == 'k') { charList.Add(" K "); };
-            if (s[i] == 'l') { charList.Add(" L "); };
-            if (s[i] == 'm') { charList.Add(" M "); };
-            if (s[i] == 'n') { charList.Add(" N "); };
-            if (s[i] == 'o') { charList.Add(" O "); };
-            if (s[i] == 'p') { charList.Add(" P "); };
-            if (s[i] == 'q') { charList.Add(" Q "); };
-            if (s[i] == 'r') { charList.Add(" R "); };
-            if (s[i] == 's') { charList.Add(" S "); };
-            if (s[i] == 't') { charList.Add(" T "); };
-            if (s[i] == 'u') { charList.Add(" U "); };
-            if (s[i] == 'v') { charList.Add(" V "); };
-            if (s[i] == 'w') { charList.Add(" W "); };
-            if (s[i] == 'x') { charList.Add(" X "); };
-            if (s[i] == 'y') { charList.Add(" Y "); };
-            if (s[i] == 'z') { charList.Add(" Z "); };
-            if (s[i] == '-') { charList.Add(" D A \n\n S H "); };
-            if (s[i] == '_') { charList.Add(" U N D \n\n E R L \n\n I N E "); };
+            switch (s[i])
+            {
+                case '0': charList.Add(" Z E \n\n R O "); break;
+                case '1': charList.Add(" O N \n\n E "); break;
+                case '2': charList.Add(" T W \n\n O "); break;
+                case '3': charList.Add(" T H \n\n R \n\n E E "); break;
+                case '4': charList.Add(" F O \n\n U R "); break;
+                case '5': charList.Add(" F I \n\n V E "); break;
+                case '6': charList.Add(" S I \n\n X "); break;
+                case '7': charList.Add(" S E \n\n V \n\n E N "); break;
+                case '8': charList.Add(" E I \n\n G \n\n H T "); break;
+                case '9': charList.Add(" N I \n\n N E "); break;
+                case 'A': charList.Add(" A L \n\n F A "); break;
+                case 'B': charList.Add(" B R \n\n A \n\n V O "); break;
+                case 'C': charList.Add(" C H \n\n A R L \n\n I E "); break;
+                case 'D': charList.Add(" D E \n\n L \n\n T A "); break;
+                case 'E': charList.Add(" E C \n\n H O "); break;
+                case 'F': charList.Add(" F O \n\n X T R \n\n O T "); break;
+                case 'G': charList.Add(" G O \n\n L F "); break;
+                case 'H': charList.Add(" H O \n\n T \n\n E L "); break;
+                case 'I': charList.Add(" I N \n\n D \n\n I A "); break;
+                case 'J': charList.Add(" J U \n\n L I E \n\n T T "); break;
+                case 'K': charList.Add(" K I \n\n L O "); break;
+                case 'L': charList.Add(" L I \n\n M A "); break;
+                case 'M': charList.Add(" M I \n\n K E "); break;
+                case 'N': charList.Add(" N O V \n\n E M \n\n B E R "); break;
+                case 'O': charList.Add(" O S \n\n C \n\n A R "); break;
+                case 'P': charList.Add(" P A \n\n P A "); break;
+                case 'Q': charList.Add(" Q U \n\n E B \n\n E C "); break;
+                case 'R': charList.Add(" R O \n\n M \n\n E O "); break;
+                case 'S': charList.Add(" S I \n\n E R \n\n R A "); break;
+                case 'T': charList.Add(" T A \n\n N \n\n G O "); break;
+                case 'U': charList.Add(" U N \n\n I F O \n\n R M "); break;
+                case 'V': charList.Add(" V I \n\n C T \n\n O R "); break;
+                case 'W': charList.Add(" W H \n\n I S K \n\n E Y "); break;
+                case 'X': charList.Add(" X R \n\n A Y "); break;
+                case 'Y': charList.Add(" Y A \n\n N K \n\n E E "); break;
+                case 'Z': charList.Add(" Z U \n\n L U "); break;
+                case 'a': charList.Add(" A "); break;
+                case 'b': charList.Add(" B "); break;
+                case 'c': charList.Add(" C "); break;
+                case 'd': charList.Add(" D "); break;
+                case 'e': charList.Add(" E "); break;
+                case 'f': charList.Add(" F "); break;
+                case 'g': charList.Add(" G "); break;
+                case 'h': charList.Add(" H "); break;
+                case 'i': charList.Add(" I "); break;
+                case 'j': charList.Add(" J "); break;
+                case 'k': charList.Add(" K "); break;
+                case 'l': charList.Add(" L "); break;
+                case 'm': charList.Add(" M "); break;
+                case 'n': charList.Add(" N "); break;
+                case 'o': charList.Add(" O "); break;
+                case 'p': charList.Add(" P "); break;
+                case 'q': charList.Add(" Q "); break;
+                case 'r': charList.Add(" R "); break;
+                case 's': charList.Add(" S "); break;
+                case 't': charList.Add(" T "); break;
+                case 'u': charList.Add(" U "); break;
+                case 'v': charList.Add(" V "); break;
+                case 'w': charList.Add(" W "); break;
+                case 'x': charList.Add(" X "); break;
+                case 'y': charList.Add(" Y "); break;
+                case 'z': charList.Add(" Z "); break;
+                case '-': charList.Add(" D A \n\n S H "); break;
+                case '_': charList.Add(" U N D \n\n E R L \n\n I N E "); break; 
+            }
         }
     }
 
@@ -569,8 +659,6 @@ public class hyperlinkScript : MonoBehaviour {
                     holdingList.Add(sync[sy]);
                 }
                 break;
-            default:
-                break;
         }
 
         screwString = charList[w];
@@ -605,11 +693,11 @@ public class hyperlinkScript : MonoBehaviour {
              screwString = screwString.Replace(" " + alphabet[m] + " ", " " + nonsense[m] + " ");
              screwString = screwString.Replace(" " + nonsense[m] + " ", " " + o[m] + " ");
          }
-        for (int p = 0; p < 26; p++)
-        {
-            screwString = screwString.Replace(" " + alphabet[p] + " ", " " + nonsense[p] + " ");
-            screwString = screwString.Replace(" " + nonsense[p] + " ", " " + o[p] + " ");
-        }
+         for (int p = 0; p < 26; p++)
+         {
+             screwString = screwString.Replace(" " + alphabet[p] + " ", " " + nonsense[p] + " ");
+             screwString = screwString.Replace(" " + nonsense[p] + " ", " " + o[p] + " ");
+         }
     }
 
     //twitch plays
@@ -692,7 +780,7 @@ public class hyperlinkScript : MonoBehaviour {
                     if (moveValid(parameters[1]))
                     {
                         yield return null;
-                        int temp = 0;
+                        int temp;
                         int.TryParse(parameters[1], out temp);
                         for (int i = 0; i < temp; i++)
                         {
@@ -749,7 +837,7 @@ public class hyperlinkScript : MonoBehaviour {
                 {
                     string modname = Back.GetComponent<Renderer>().material.name.ToLower();
                     modname = modname.Replace(" (instance)", "");
-                    int rando = UnityEngine.Random.Range(0, 2);
+                    int rando = Random.Range(0, 2);
                     int counter = 0;
                     while (!module.Equals(modname))
                     {
@@ -806,7 +894,7 @@ public class hyperlinkScript : MonoBehaviour {
                     }
                     else
                     {
-                        int rando = UnityEngine.Random.Range(0, 2);
+                        int rando = Random.Range(0, 2);
                         for (int i = 0; i < ctleft; i++)
                         {
                             Arrows[rando].OnInteract();
