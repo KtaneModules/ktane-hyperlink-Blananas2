@@ -1,6 +1,6 @@
 ﻿public static class IDList
 {
-    public static string[] phrases =
+    public static readonly string[] phrases =
     {
         "yK-2RwenHyg",  "3D Maze",
         "3lrvgMc7DBU",  "Adjacent Letters",
