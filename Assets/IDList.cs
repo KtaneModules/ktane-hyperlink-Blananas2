@@ -64,7 +64,7 @@
         "xvoRyekWpK8",  "Maze",
         "PCUxXuW9Opk",  "Memory",
         "W1aZAIaM0t0",  "Microcontroller",
-        "wicpqX_Krnc",  "Module Against Humanity",
+        "wicpqX_Krnc",  "Modules Against Humanity",
         "6EU46vycYGk",  "Monsplode Trading Cards",
         "wAOF8whYH5I",  "Monsplode, Fight!",
         "EiTW9_xQlSw",  "Morse Code",

@@ -279,6 +279,7 @@ public class hyperlinkScript : MonoBehaviour {
             step = (step + 1) % 2;
             if (step == 1)
             {
+                HideMaritime();
                 Audio.PlaySoundAtTransform("button", transform);
                 Square.AddInteractionPunch();
                 MainText.text = "";
@@ -759,7 +760,7 @@ public class hyperlinkScript : MonoBehaviour {
 
     private bool listContains(string s)
     {
-        return Enumerable.Range(0, IDList.phrases.Length).Where(x => x % 2 != 0).Select(x => IDList.phrases[x]).Contains(s);
+        return Enumerable.Range(0, IDList.phrases.Length).Where(x => x % 2 != 0).Select(x => IDList.phrases[x].ToLowerInvariant()).Contains(s);
     }
 
     #pragma warning disable 414
