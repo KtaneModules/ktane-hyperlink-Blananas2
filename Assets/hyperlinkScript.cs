@@ -25,6 +25,8 @@ public class hyperlinkScript : MonoBehaviour {
     public Font[] Fonts;
     public Material[] FontMats;
     public GameObject[] RGB;
+    public SpriteRenderer[] MariPos;
+    public Sprite[] MariFlags;
 
     //Logging
     static int moduleIdCounter = 1;
@@ -174,9 +176,8 @@ public class hyperlinkScript : MonoBehaviour {
         {
             return;
         }
-        if (step == 1) {
-            StopCoroutine(buttonHold);
-        }
+        holding = false;
+        StopAllCoroutines();
     }
     
     private void OnDestroy()
@@ -224,7 +225,7 @@ public class hyperlinkScript : MonoBehaviour {
 
         Debug.LogFormat(
             error
-                ? "[The Hyperlink #{0}] The module failed to connect the the server, use the youtube link instead."
+                ? "[The Hyperlink #{0}] The module failed to connect the the server, use the YouTube link instead."
                 : "[The Hyperlink #{0}] The module connected to the server.", moduleId);
         for (int a = 0; a < 11; a++)
         {
@@ -241,7 +242,7 @@ public class hyperlinkScript : MonoBehaviour {
 
     public IEnumerator ConnectionLost()
     {
-        Debug.LogFormat("[The Hyperlink #{0}] The module has lost its connection to the server and will now use the youtube link instead", moduleId);
+        Debug.LogFormat("[The Hyperlink #{0}] The module has lost its connection to the server and will now use the YouTube link instead.", moduleId);
         ConnectionLED.material = OtherMats[7];
         StartCoroutine(ConnectionError());
         yield return null;
@@ -348,6 +349,7 @@ public class hyperlinkScript : MonoBehaviour {
 
     void UpdateText ()
     {
+        HideMaritime();
         MainText.text = screwList[currentScreen];
 
         switch (index[currentScreen]) {
@@ -388,8 +390,10 @@ public class hyperlinkScript : MonoBehaviour {
                 MainText.GetComponent<Renderer>().material = FontMats[8];
                 break;
             case 10:
+                MainText.text = "";
                 MainText.font = Fonts[7];
                 MainText.GetComponent<Renderer>().material = FontMats[7];
+                ShowMaritime(selectedString[currentScreen]);
                 break;
             case 11:
                 MainText.font = Fonts[11];
@@ -490,6 +494,90 @@ public class hyperlinkScript : MonoBehaviour {
         }
 
         MainText.GetComponent<TextMesh>().fontSize = charList[currentScreen].Length == 3 ? 288 : 144;
+    }
+
+    void HideMaritime () {
+        for (int g = 0; g < 20; g++) {
+            MariPos[g].sprite = MariFlags[0];
+        }
+    }
+
+    void ShowMaritime(char c) {
+        int one = 4;
+        int[] three = new int[] { 15, 16, 19 };
+        int[] four = new int[] { 15, 16, 17, 18 };
+        int[] five = new int[] { 9, 10, 4, 13, 14 };
+        int[] six = new int[] { 9, 10, 11, 12, 13, 14 };
+        int[] seven = new int[] { 9, 10, 3, 4, 5, 13, 14 };
+        int[] eight = new int[] { 0, 1, 2, 11, 12, 6, 7, 8 };
+        int[] nine = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+
+        switch (c) {
+            case '0': MariPos[four[0]].sprite = MariFlags[26]; MariPos[four[1]].sprite = MariFlags[5]; MariPos[four[2]].sprite = MariFlags[18]; MariPos[four[3]].sprite = MariFlags[15]; break;     
+            case '1': MariPos[three[0]].sprite = MariFlags[15]; MariPos[three[1]].sprite = MariFlags[14]; MariPos[three[2]].sprite = MariFlags[5]; break;      
+            case '2': MariPos[three[0]].sprite = MariFlags[20]; MariPos[three[1]].sprite = MariFlags[23]; MariPos[three[2]].sprite = MariFlags[15]; break;      
+            case '3': MariPos[five[0]].sprite = MariFlags[20]; MariPos[five[1]].sprite = MariFlags[8]; MariPos[five[2]].sprite = MariFlags[18]; MariPos[five[3]].sprite = MariFlags[5]; MariPos[five[4]].sprite = MariFlags[5]; break;    
+            case '4': MariPos[four[0]].sprite = MariFlags[6]; MariPos[four[1]].sprite = MariFlags[15]; MariPos[four[2]].sprite = MariFlags[21]; MariPos[four[3]].sprite = MariFlags[18]; break;     
+            case '5': MariPos[four[0]].sprite = MariFlags[6]; MariPos[four[1]].sprite = MariFlags[9]; MariPos[four[2]].sprite = MariFlags[22]; MariPos[four[3]].sprite = MariFlags[5]; break;     
+            case '6': MariPos[three[0]].sprite = MariFlags[19]; MariPos[three[1]].sprite = MariFlags[9]; MariPos[three[2]].sprite = MariFlags[24]; break;      
+            case '7': MariPos[five[0]].sprite = MariFlags[19]; MariPos[five[1]].sprite = MariFlags[5]; MariPos[five[2]].sprite = MariFlags[22]; MariPos[five[3]].sprite = MariFlags[5]; MariPos[five[4]].sprite = MariFlags[14]; break;    
+            case '8': MariPos[five[0]].sprite = MariFlags[5]; MariPos[five[1]].sprite = MariFlags[9]; MariPos[five[2]].sprite = MariFlags[7]; MariPos[five[3]].sprite = MariFlags[8]; MariPos[five[4]].sprite = MariFlags[20]; break;    
+            case '9': MariPos[four[0]].sprite = MariFlags[14]; MariPos[four[1]].sprite = MariFlags[9]; MariPos[four[2]].sprite = MariFlags[14]; MariPos[four[3]].sprite = MariFlags[5]; break;     
+            case 'A': MariPos[four[0]].sprite = MariFlags[1]; MariPos[four[1]].sprite = MariFlags[12]; MariPos[four[2]].sprite = MariFlags[6]; MariPos[four[3]].sprite = MariFlags[1]; break;     
+            case 'B': MariPos[five[0]].sprite = MariFlags[2]; MariPos[five[1]].sprite = MariFlags[18]; MariPos[five[2]].sprite = MariFlags[1]; MariPos[five[3]].sprite = MariFlags[22]; MariPos[five[4]].sprite = MariFlags[15]; break;    
+            case 'C': MariPos[seven[0]].sprite = MariFlags[3]; MariPos[seven[1]].sprite = MariFlags[8]; MariPos[seven[2]].sprite = MariFlags[1]; MariPos[seven[3]].sprite = MariFlags[18]; MariPos[seven[4]].sprite = MariFlags[12]; MariPos[seven[5]].sprite = MariFlags[9]; MariPos[seven[6]].sprite = MariFlags[5]; break;  
+            case 'D': MariPos[five[0]].sprite = MariFlags[4]; MariPos[five[1]].sprite = MariFlags[5]; MariPos[five[2]].sprite = MariFlags[12]; MariPos[five[3]].sprite = MariFlags[20]; MariPos[five[4]].sprite = MariFlags[1]; break;    
+            case 'E': MariPos[four[0]].sprite = MariFlags[5]; MariPos[four[1]].sprite = MariFlags[3]; MariPos[four[2]].sprite = MariFlags[8]; MariPos[four[3]].sprite = MariFlags[15]; break;     
+            case 'F': MariPos[seven[0]].sprite = MariFlags[6]; MariPos[seven[1]].sprite = MariFlags[15]; MariPos[seven[2]].sprite = MariFlags[24]; MariPos[seven[3]].sprite = MariFlags[20]; MariPos[seven[4]].sprite = MariFlags[18]; MariPos[seven[5]].sprite = MariFlags[15]; MariPos[seven[6]].sprite = MariFlags[20]; break;  
+            case 'G': MariPos[four[0]].sprite = MariFlags[7]; MariPos[four[1]].sprite = MariFlags[15]; MariPos[four[2]].sprite = MariFlags[12]; MariPos[four[3]].sprite = MariFlags[6]; break;     
+            case 'H': MariPos[five[0]].sprite = MariFlags[8]; MariPos[five[1]].sprite = MariFlags[15]; MariPos[five[2]].sprite = MariFlags[20]; MariPos[five[3]].sprite = MariFlags[5]; MariPos[five[4]].sprite = MariFlags[12]; break;    
+            case 'I': MariPos[five[0]].sprite = MariFlags[9]; MariPos[five[1]].sprite = MariFlags[14]; MariPos[five[2]].sprite = MariFlags[4]; MariPos[five[3]].sprite = MariFlags[9]; MariPos[five[4]].sprite = MariFlags[1]; break;    
+            case 'J': MariPos[seven[0]].sprite = MariFlags[10]; MariPos[seven[1]].sprite = MariFlags[21]; MariPos[seven[2]].sprite = MariFlags[12]; MariPos[seven[3]].sprite = MariFlags[9]; MariPos[seven[4]].sprite = MariFlags[5]; MariPos[seven[5]].sprite = MariFlags[20]; MariPos[seven[6]].sprite = MariFlags[20]; break;  
+            case 'K': MariPos[four[0]].sprite = MariFlags[11]; MariPos[four[1]].sprite = MariFlags[9]; MariPos[four[2]].sprite = MariFlags[12]; MariPos[four[3]].sprite = MariFlags[15]; break;     
+            case 'L': MariPos[four[0]].sprite = MariFlags[12]; MariPos[four[1]].sprite = MariFlags[9]; MariPos[four[2]].sprite = MariFlags[13]; MariPos[four[3]].sprite = MariFlags[1]; break;     
+            case 'M': MariPos[four[0]].sprite = MariFlags[13]; MariPos[four[1]].sprite = MariFlags[9]; MariPos[four[2]].sprite = MariFlags[11]; MariPos[four[3]].sprite = MariFlags[5]; break;     
+            case 'N': MariPos[eight[0]].sprite = MariFlags[14]; MariPos[eight[1]].sprite = MariFlags[15]; MariPos[eight[2]].sprite = MariFlags[22]; MariPos[eight[3]].sprite = MariFlags[5]; MariPos[eight[4]].sprite = MariFlags[13]; MariPos[eight[5]].sprite = MariFlags[2]; MariPos[eight[6]].sprite = MariFlags[5]; MariPos[eight[7]].sprite = MariFlags[18]; break; 
+            case 'O': MariPos[five[0]].sprite = MariFlags[15]; MariPos[five[1]].sprite = MariFlags[19]; MariPos[five[2]].sprite = MariFlags[3]; MariPos[five[3]].sprite = MariFlags[1]; MariPos[five[4]].sprite = MariFlags[18]; break;    
+            case 'P': MariPos[four[0]].sprite = MariFlags[16]; MariPos[four[1]].sprite = MariFlags[1]; MariPos[four[2]].sprite = MariFlags[16]; MariPos[four[3]].sprite = MariFlags[1]; break;     
+            case 'Q': MariPos[six[0]].sprite = MariFlags[17]; MariPos[six[1]].sprite = MariFlags[21]; MariPos[six[2]].sprite = MariFlags[5]; MariPos[six[3]].sprite = MariFlags[2]; MariPos[six[4]].sprite = MariFlags[5]; MariPos[six[5]].sprite = MariFlags[3]; break;   
+            case 'R': MariPos[five[0]].sprite = MariFlags[18]; MariPos[five[1]].sprite = MariFlags[15]; MariPos[five[2]].sprite = MariFlags[13]; MariPos[five[3]].sprite = MariFlags[5]; MariPos[five[4]].sprite = MariFlags[15]; break;    
+            case 'S': MariPos[six[0]].sprite = MariFlags[19]; MariPos[six[1]].sprite = MariFlags[9]; MariPos[six[2]].sprite = MariFlags[5]; MariPos[six[3]].sprite = MariFlags[18]; MariPos[six[4]].sprite = MariFlags[18]; MariPos[six[5]].sprite = MariFlags[1]; break;   
+            case 'T': MariPos[five[0]].sprite = MariFlags[20]; MariPos[five[1]].sprite = MariFlags[1]; MariPos[five[2]].sprite = MariFlags[14]; MariPos[five[3]].sprite = MariFlags[7]; MariPos[five[4]].sprite = MariFlags[15]; break;    
+            case 'U': MariPos[seven[0]].sprite = MariFlags[21]; MariPos[seven[1]].sprite = MariFlags[14]; MariPos[seven[2]].sprite = MariFlags[9]; MariPos[seven[3]].sprite = MariFlags[6]; MariPos[seven[4]].sprite = MariFlags[15]; MariPos[seven[5]].sprite = MariFlags[18]; MariPos[seven[6]].sprite = MariFlags[13]; break;  
+            case 'V': MariPos[six[0]].sprite = MariFlags[22]; MariPos[six[1]].sprite = MariFlags[9]; MariPos[six[2]].sprite = MariFlags[3]; MariPos[six[3]].sprite = MariFlags[20]; MariPos[six[4]].sprite = MariFlags[15]; MariPos[six[5]].sprite = MariFlags[18]; break;   
+            case 'W': MariPos[seven[0]].sprite = MariFlags[23]; MariPos[seven[1]].sprite = MariFlags[8]; MariPos[seven[2]].sprite = MariFlags[9]; MariPos[seven[3]].sprite = MariFlags[19]; MariPos[seven[4]].sprite = MariFlags[11]; MariPos[seven[5]].sprite = MariFlags[5]; MariPos[seven[6]].sprite = MariFlags[25]; break;  
+            case 'X': MariPos[four[0]].sprite = MariFlags[24]; MariPos[four[1]].sprite = MariFlags[18]; MariPos[four[2]].sprite = MariFlags[1]; MariPos[four[3]].sprite = MariFlags[25]; break;     
+            case 'Y': MariPos[six[0]].sprite = MariFlags[25]; MariPos[six[1]].sprite = MariFlags[1]; MariPos[six[2]].sprite = MariFlags[14]; MariPos[six[3]].sprite = MariFlags[11]; MariPos[six[4]].sprite = MariFlags[5]; MariPos[six[5]].sprite = MariFlags[5]; break;   
+            case 'Z': MariPos[four[0]].sprite = MariFlags[26]; MariPos[four[1]].sprite = MariFlags[21]; MariPos[four[2]].sprite = MariFlags[12]; MariPos[four[3]].sprite = MariFlags[21]; break;     
+            case 'a': MariPos[one].sprite = MariFlags[1]; break;        
+            case 'b': MariPos[one].sprite = MariFlags[2]; break;        
+            case 'c': MariPos[one].sprite = MariFlags[3]; break;        
+            case 'd': MariPos[one].sprite = MariFlags[4]; break;        
+            case 'e': MariPos[one].sprite = MariFlags[5]; break;        
+            case 'f': MariPos[one].sprite = MariFlags[6]; break;        
+            case 'g': MariPos[one].sprite = MariFlags[7]; break;        
+            case 'h': MariPos[one].sprite = MariFlags[8]; break;        
+            case 'i': MariPos[one].sprite = MariFlags[9]; break;        
+            case 'j': MariPos[one].sprite = MariFlags[10]; break;        
+            case 'k': MariPos[one].sprite = MariFlags[11]; break;        
+            case 'l': MariPos[one].sprite = MariFlags[12]; break;        
+            case 'm': MariPos[one].sprite = MariFlags[13]; break;        
+            case 'n': MariPos[one].sprite = MariFlags[14]; break;        
+            case 'o': MariPos[one].sprite = MariFlags[15]; break;        
+            case 'p': MariPos[one].sprite = MariFlags[16]; break;        
+            case 'q': MariPos[one].sprite = MariFlags[17]; break;        
+            case 'r': MariPos[one].sprite = MariFlags[18]; break;        
+            case 's': MariPos[one].sprite = MariFlags[19]; break;        
+            case 't': MariPos[one].sprite = MariFlags[20]; break;        
+            case 'u': MariPos[one].sprite = MariFlags[21]; break;        
+            case 'v': MariPos[one].sprite = MariFlags[22]; break;        
+            case 'w': MariPos[one].sprite = MariFlags[23]; break;        
+            case 'x': MariPos[one].sprite = MariFlags[24]; break;        
+            case 'y': MariPos[one].sprite = MariFlags[25]; break;        
+            case 'z': MariPos[one].sprite = MariFlags[26]; break;        
+            case '-': MariPos[four[0]].sprite = MariFlags[4]; MariPos[four[1]].sprite = MariFlags[1]; MariPos[four[2]].sprite = MariFlags[19]; MariPos[four[3]].sprite = MariFlags[8]; break;     
+            case '_': MariPos[nine[0]].sprite = MariFlags[21]; MariPos[nine[1]].sprite = MariFlags[14]; MariPos[nine[2]].sprite = MariFlags[4]; MariPos[nine[3]].sprite = MariFlags[5]; MariPos[nine[4]].sprite = MariFlags[18]; MariPos[nine[5]].sprite = MariFlags[12]; MariPos[nine[6]].sprite = MariFlags[9]; MariPos[nine[7]].sprite = MariFlags[14]; MariPos[nine[8]].sprite = MariFlags[5]; break;
+        }
     }
 
     void StringToLetters (string s)
@@ -594,9 +682,6 @@ public class hyperlinkScript : MonoBehaviour {
                     break;
                 case 15:
                     LetterSwitch("acegikmoqbdfhjlnprsuwytvxz", j);
-                    break;
-                case 16:
-                    LetterSwitch("ABCDEFGHIJKLM\\OPQRSTUVWXYZ", j);
                     break;
                 case 19:
                     BiggerSwitch(6, j);
