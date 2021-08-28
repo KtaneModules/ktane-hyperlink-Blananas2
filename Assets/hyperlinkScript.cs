@@ -18,7 +18,7 @@ public class hyperlinkScript : MonoBehaviour {
     public GameObject Back;
     public GameObject veryBack;
     public GameObject Outer;
-    public GameObject[] Frame;
+    public MeshRenderer Frame;
     public Material[] OOOMats;
     public Material[] OtherMats;
     public Material[] IconMats;
@@ -33,37 +33,37 @@ public class hyperlinkScript : MonoBehaviour {
     private int moduleId;
     public bool moduleSolved;
 
-    private Coroutine buttonHold;
 	private bool holding;
     private bool interactable;
     private int btn;
 
     int selectedID;
     int anchor;
+    int moduleIndex { get { return anchor + 1; } }
     int currentScreen;
     string selectedString = "";
-    private List<string> charList = new List<string>();
-    private List<string> screwList = new List<string>();
-    string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    string nonsense = "⅓⅔⅛⅜⅝⅞ↄ←↑→↓↔↨∂∆∏∑−∕∙√∞∟∩∫≈";
+    private readonly List<string> charList = new List<string>();
+    private readonly List<string> screwList = new List<string>();
+    readonly string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    readonly string nonsense = "⅓⅔⅛⅜⅝⅞ↄ←↑→↓↔↨∂∆∏∑−∕∙√∞∟∩∫≈";
     string screwString = "";
     string connectionLink;
     int step;
     int selectedIcon = 60;
-    private List<string> colorString = new List<string> { "0FF", "08F", "888", "F80", "FFF", "8F0", "00F", "FF8", "808", "F0F", "0F0", "F8F", "080", "FF0", "800", "8F8", "008", "880", "88F", "F08", "F88", "F00", "0F8", "000", "088", "8FF", "80F" };
+    private readonly List<string> colorString = new List<string> { "0FF", "08F", "888", "F80", "FFF", "8F0", "00F", "FF8", "808", "F0F", "0F0", "F8F", "080", "FF0", "800", "8F8", "008", "880", "88F", "F08", "F88", "F00", "0F8", "000", "088", "8FF", "80F" };
 
-    private List<int> index = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
-    private List<string> encodings = new List<string> { "Alphabetic Position", "American Sign Language", "Binary", "Boozleglyphs", "Braille", "Cube Symbols", "\"Deaf\" Semaphore Telegraph", "Elder Futhark", "14-Segment Display", "Lombax", "Maritime Flags", "Moon Type", "Morse Code", "Necronomicon", "Ogham", "Pigpen", "Semaphore", "Standard", "Standard Galactic Alphabet", "SYNC-125 [3]", "Tap Code", "Unown", "Webdings", "Wingdings", "Wingdings 2", "Wingdings 3", "Zoni"};
+    private readonly List<int> index = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+    private readonly List<string> encodings = new List<string> { "Alphabetic Position", "American Sign Language", "Binary", "Boozleglyphs", "Braille", "Cube Symbols", "\"Deaf\" Semaphore Telegraph", "Elder Futhark", "14-Segment Display", "Lombax", "Maritime Flags", "Moon Type", "Morse Code", "Necronomicon", "Ogham", "Pigpen", "Semaphore", "Standard", "Standard Galactic Alphabet", "SYNC-125 [3]", "Tap Code", "Unown", "Webdings", "Wingdings", "Wingdings 2", "Wingdings 3", "Zoni"};
 
-    private List<string> alphabeticPosition = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26" };
-    private List<string> binary = new List<string> { "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001", "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011", "10100", "10101", "10110", "10111", "11000", "11001", "11010" };
-    private List<string> elderFuthark = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "cc", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "uu", "x", "y", "z" };
-    private List<string> morse = new List<string> { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.." };
-    private List<string> ogham = new List<string> { "┼", "┬", "╨╨", "╨", "╫╫", "┬┬┬", "//", "┴", "╫┼╫", "#", "₩", "╥", "/", "╥┬╥", "╫", "═", "╨┴╨", "/////", "╥╥", "┴┴┴", "┼┼┼", "□", "◊", "X", "///", "////" };
-    private List<string> sync = new List<string> { "a", "p'", "C", "t'", "e", "f", "k'", "h", "i", "j'", "k", "r'", "m", "n", "o", "p", "?", "r", "s", "t", "u", "f'", "w", "!", "y", "s'" };
-    private List<string> tapCode = new List<string> { "11", "12", "13", "14", "15", "21", "22", "23", "24", "25", "66", "31", "32", "33", "34", "35", "41", "42", "43", "44", "45", "51", "52", "53", "54", "55" };
+    private readonly List<string> alphabeticPosition = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26" };
+    private readonly List<string> binary = new List<string> { "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001", "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011", "10100", "10101", "10110", "10111", "11000", "11001", "11010" };
+    private readonly List<string> elderFuthark = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "cc", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "uu", "x", "y", "z" };
+    private readonly List<string> morse = new List<string> { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.." };
+    private readonly List<string> ogham = new List<string> { "┼", "┬", "╨╨", "╨", "╫╫", "┬┬┬", "//", "┴", "╫┼╫", "#", "₩", "╥", "/", "╥┬╥", "╫", "═", "╨┴╨", "/////", "╥╥", "┴┴┴", "┼┼┼", "□", "◊", "X", "///", "////" };
+    private readonly List<string> sync = new List<string> { "a", "p'", "C", "t'", "e", "f", "k'", "h", "i", "j'", "k", "r'", "m", "n", "o", "p", "?", "r", "s", "t", "u", "f'", "w", "!", "y", "s'" };
+    private readonly List<string> tapCode = new List<string> { "11", "12", "13", "14", "15", "21", "22", "23", "24", "25", "66", "31", "32", "33", "34", "35", "41", "42", "43", "44", "45", "51", "52", "53", "54", "55" };
 
-    private List<string> holdingList = new List<string>();
+    private readonly List<string> holdingList = new List<string>();
 
     private hyperlinkWebSocketManager _webSocketManager;
 
@@ -131,23 +131,23 @@ public class hyperlinkScript : MonoBehaviour {
                 }
             }
 
-            if (currentScreen == 0)
+            switch (currentScreen)
             {
-                Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[1];
-                Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
-            }
-            else if (currentScreen == 10)
-            {
-                Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[0];
-                Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[1];
-            }
-            else
-            {
-                Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[0];
-                Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
+                case 0:
+                    Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[1];
+                    Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
+                    break;
+                case 10:
+                    Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[0];
+                    Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[1];
+                    break;
+                default:
+                    Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[0];
+                    Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
+                    break;
             }
 
-            TopNumber.text = " " + (currentScreen + 1) + " ";
+            TopNumber.text = string.Format(" {0} ", currentScreen + 1);
             UpdateText();
         } else if (step == 1)
         {
@@ -167,7 +167,7 @@ public class hyperlinkScript : MonoBehaviour {
             if (selectedIcon == -1) { selectedIcon = 120; }
             if (selectedIcon == 121) { selectedIcon = 0; }
             Back.GetComponent<Renderer>().material = IconMats[selectedIcon];
-            buttonHold = StartCoroutine(HoldChecker());
+            StartCoroutine(HoldChecker());
         }
     }
 
@@ -203,7 +203,7 @@ public class hyperlinkScript : MonoBehaviour {
         if (step == 1 && error)
         {
             currentScreen = 0;
-            TopNumber.text = " " + (currentScreen + 1) + " ";
+            TopNumber.text = string.Format(" {0} ", currentScreen + 1);
             Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[1];
             Back.GetComponent<Renderer>().material = OtherMats[2];
             step = 0;
@@ -231,7 +231,7 @@ public class hyperlinkScript : MonoBehaviour {
         {
             Debug.LogFormat("[The Hyperlink #{0}] Encoding {1}: '{2}' in {3} => '{4}' => {5}", moduleId, a + 1, screwList[a].Replace("\n", ""), encodings[index[a]], charList[a].Replace("\n", ""), selectedString[a] );
         }
-        Debug.LogFormat("[The Hyperlink #{0}] Video {3}{1} references {2}.", moduleId, selectedString, IDList.phrases[anchor + 1], error ? "https://www.youtube.com/watch?v=" : "https://marksam32.github.io/hl/?link=");
+        Debug.LogFormat("[The Hyperlink #{0}] Video {3}{1} references {2}.", moduleId, selectedString, IDList.phrases[moduleIndex], error ? "https://www.youtube.com/watch?v=" : "https://marksam32.github.io/hl/?link=");
         interactable = true;
         Circle.GetComponent<MeshRenderer>().material = OtherMats[0];
         Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
@@ -256,9 +256,9 @@ public class hyperlinkScript : MonoBehaviour {
             backHere:
             Audio.PlaySoundAtTransform("button", transform);
             if (btn == 0) {
-                selectedIcon = (selectedIcon - 1);
+                selectedIcon = selectedIcon - 1;
             } else {
-                selectedIcon = (selectedIcon + 1);
+                selectedIcon = selectedIcon + 1;
             }
             if (selectedIcon == -1) { selectedIcon = 120; }
             if (selectedIcon == 121) { selectedIcon = 0; }
@@ -291,10 +291,7 @@ public class hyperlinkScript : MonoBehaviour {
                 {
                     Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];
                 }
-                Frame[0].GetComponent<Renderer>().material = OtherMats[2];
-                Frame[1].GetComponent<Renderer>().material = OtherMats[2];
-                Frame[2].GetComponent<Renderer>().material = OtherMats[2];
-                Frame[3].GetComponent<Renderer>().material = OtherMats[2];
+                Frame.material = OtherMats[2];
                 RGB[0].GetComponent<Renderer>().material = OtherMats[2];
                 RGB[1].GetComponent<Renderer>().material = OtherMats[2];
                 RGB[2].GetComponent<Renderer>().material = OtherMats[2];
@@ -305,7 +302,7 @@ public class hyperlinkScript : MonoBehaviour {
             {
                 if (selectedIcon == selectedID)
                 {
-                    Debug.LogFormat("[The Hyperlink #{0}] Icon for {1} selected, module solved.", moduleId, IDList.phrases[anchor + 1]);
+                    Debug.LogFormat("[The Hyperlink #{0}] Icon for {1} selected, module solved.", moduleId, IDList.phrases[moduleIndex]);
                     Audio.PlaySoundAtTransform("solve", transform);
                     GetComponent<KMBombModule>().HandlePass();
                     if (connectionSuccessful)
@@ -317,10 +314,7 @@ public class hyperlinkScript : MonoBehaviour {
                     step = 999;
                     TopNumber.text = "   ";
                     ConnectionLED.material = OtherMats[2];
-                    Frame[0].GetComponent<Renderer>().material = OtherMats[2];
-                    Frame[1].GetComponent<Renderer>().material = OtherMats[2];
-                    Frame[2].GetComponent<Renderer>().material = OtherMats[2];
-                    Frame[3].GetComponent<Renderer>().material = OtherMats[2];
+                    Frame.material = OtherMats[2];
                     RGB[0].GetComponent<Renderer>().material = OtherMats[2];
                     RGB[1].GetComponent<Renderer>().material = OtherMats[2];
                     RGB[2].GetComponent<Renderer>().material = OtherMats[2];
@@ -338,7 +332,7 @@ public class hyperlinkScript : MonoBehaviour {
                     GetComponent<KMBombModule>().HandleStrike();
                     Square.AddInteractionPunch();
                     currentScreen = 0;
-                    TopNumber.text = " " + (currentScreen + 1) + " ";
+                    TopNumber.text = string.Format(" {0} ", currentScreen + 1);
                     Arrows[0].GetComponent<MeshRenderer>().material = OtherMats[1];
                     Back.GetComponent<Renderer>().material = OtherMats[2];
                     UpdateText();
@@ -448,49 +442,21 @@ public class hyperlinkScript : MonoBehaviour {
                 MainText.GetComponent<Renderer>().material = FontMats[0];
                 break;
         }
-
-        Frame[0].GetComponent<Renderer>().material = OOOMats[index[currentScreen]];
-        Frame[1].GetComponent<Renderer>().material = OOOMats[index[currentScreen]];
-        Frame[2].GetComponent<Renderer>().material = OOOMats[index[currentScreen]];
-        Frame[3].GetComponent<Renderer>().material = OOOMats[index[currentScreen]];
-
-        if (colorString[index[currentScreen]][0] == '0')
+        Frame.material = OOOMats[index[currentScreen]];
+        for(var i = 0; i < 3; ++i)
         {
-            RGB[0].GetComponent<Renderer>().material = OtherMats[2];
-        }
-        else if (colorString[index[currentScreen]][0] == '8')
-        {
-            RGB[0].GetComponent<Renderer>().material = OtherMats[3];
-        }
-        else
-        {
-            RGB[0].GetComponent<Renderer>().material = OtherMats[6];
-        }
-
-        if (colorString[index[currentScreen]][1] == '0')
-        {
-            RGB[1].GetComponent<Renderer>().material = OtherMats[2];
-        }
-        else if (colorString[index[currentScreen]][1] == '8')
-        {
-            RGB[1].GetComponent<Renderer>().material = OtherMats[4];
-        }
-        else
-        {
-            RGB[1].GetComponent<Renderer>().material = OtherMats[7];
-        }
-
-        if (colorString[index[currentScreen]][2] == '0')
-        {
-            RGB[2].GetComponent<Renderer>().material = OtherMats[2];
-        }
-        else if (colorString[index[currentScreen]][2] == '8')
-        {
-            RGB[2].GetComponent<Renderer>().material = OtherMats[5];
-        }
-        else
-        {
-            RGB[2].GetComponent<Renderer>().material = OtherMats[8];
+            switch (colorString[index[currentScreen]][i])
+            {
+                case '0':
+                    RGB[i].GetComponent<Renderer>().material = OtherMats[2];
+                    break;
+                case '8':
+                    RGB[i].GetComponent<Renderer>().material = OtherMats[i + 3];
+                    break;
+                default:
+                    RGB[i].GetComponent<Renderer>().material = OtherMats[i + 6];
+                    break;
+            }
         }
 
         MainText.GetComponent<TextMesh>().fontSize = charList[currentScreen].Length == 3 ? 288 : 144;
@@ -503,14 +469,14 @@ public class hyperlinkScript : MonoBehaviour {
     }
 
     void ShowMaritime(char c) {
-        int one = 4;
-        int[] three = new int[] { 15, 16, 19 };
-        int[] four = new int[] { 15, 16, 17, 18 };
-        int[] five = new int[] { 9, 10, 4, 13, 14 };
-        int[] six = new int[] { 9, 10, 11, 12, 13, 14 };
-        int[] seven = new int[] { 9, 10, 3, 4, 5, 13, 14 };
-        int[] eight = new int[] { 0, 1, 2, 11, 12, 6, 7, 8 };
-        int[] nine = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+        const int one = 4;
+        int[] three = new[] { 15, 16, 19 };
+        int[] four = new[] { 15, 16, 17, 18 };
+        int[] five = new[] { 9, 10, 4, 13, 14 };
+        int[] six = new[] { 9, 10, 11, 12, 13, 14 };
+        int[] seven = new[] { 9, 10, 3, 4, 5, 13, 14 };
+        int[] eight = new[] { 0, 1, 2, 11, 12, 6, 7, 8 };
+        int[] nine = new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 
         switch (c) {
             case '0': MariPos[four[0]].sprite = MariFlags[26]; MariPos[four[1]].sprite = MariFlags[5]; MariPos[four[2]].sprite = MariFlags[18]; MariPos[four[3]].sprite = MariFlags[15]; break;     
@@ -751,17 +717,17 @@ public class hyperlinkScript : MonoBehaviour {
         //AAAAAAA MESSY CODE NO LOOK HERE AAAAAAA
         for (int k = 0; k < 26; k++)
         {
-            screwString = screwString.Replace(" " + alphabet[k] + " ", " " + nonsense[k] + " ");
-            screwString = screwString.Replace(" " + nonsense[k] + " ", " " + holdingList[k] + " ");
+            screwString = screwString.Replace(string.Format(" {0} ", alphabet[k]), string.Format(" {0} ", nonsense[k]));
+            screwString = screwString.Replace(string.Format(" {0} ", nonsense[k]), string.Format(" {0} ", holdingList[k]));
         }
         for (int n = 0; n < 26; n++)
         {
-            screwString = screwString.Replace(" " + alphabet[n] + " ", " " + nonsense[n] + " ");
-            screwString = screwString.Replace(" " + nonsense[n] + " ", " " + holdingList[n] + " ");
+            screwString = screwString.Replace(string.Format(" {0} ", alphabet[n]), string.Format(" {0} ", nonsense[n]));
+            screwString = screwString.Replace(string.Format(" {0} ", nonsense[n]), string.Format(" {0} ", holdingList[n]));
         }
 
         if (l == 4) {
-            screwString = ">" + screwString + "<";
+            screwString = string.Format(">{0}<", screwString);
             screwString = screwString.Replace("> ", ">");
             screwString = screwString.Replace(" <", "<");
         }
@@ -775,44 +741,29 @@ public class hyperlinkScript : MonoBehaviour {
 
          for (int m = 0; m < 26; m++)
          {
-             screwString = screwString.Replace(" " + alphabet[m] + " ", " " + nonsense[m] + " ");
-             screwString = screwString.Replace(" " + nonsense[m] + " ", " " + o[m] + " ");
+             screwString = screwString.Replace(string.Format(" {0} ", alphabet[m]), string.Format(" {0} ", nonsense[m]));
+             screwString = screwString.Replace(string.Format(" {0} ", nonsense[m]), string.Format(" {0} ", o[m]));
          }
          for (int p = 0; p < 26; p++)
          {
-             screwString = screwString.Replace(" " + alphabet[p] + " ", " " + nonsense[p] + " ");
-             screwString = screwString.Replace(" " + nonsense[p] + " ", " " + o[p] + " ");
+             screwString = screwString.Replace(string.Format(" {0} ", alphabet[p]), string.Format(" {0} ", nonsense[p]));
+             screwString = screwString.Replace(string.Format(" {0} ", nonsense[p]), string.Format(" {0} ", o[p]));
          }
     }
 
     //twitch plays
-    private bool moveValid(string s)
+    private bool moveValid(string s) 
     {
-        string[] valids = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-        if (valids.Contains(s))
-        {
-            return true;
-        }
-        return false;
-    }
+        return new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }.Contains(s);
+    } 
 
     private bool listContains(string s)
     {
-        List<string> names = new List<string>();
-        for (int i = 0; i < IDList.phrases.Length; i++)
-        {
-            if (i % 2 != 0)
-            {
-                names.Add(IDList.phrases[i].ToLower());
-            }
-        }
-        if (names.Contains(s))
-            return true;
-        return false;
+        return Enumerable.Range(0, IDList.phrases.Length).Where(x => x % 2 != 0).Select(x => IDList.phrases[x]).Contains(s);
     }
 
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} left/right (#) [Press the left/right arrow (optionally '#' times)] | !{0} submit <module> [Submits the specified module]";
+    private const string TwitchHelpMessage = @"!{0} left/right (#) [Press the left/right arrow (optionally '#' times)] | !{0} submit <module> [Submits the specified module]";
     #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
@@ -869,7 +820,7 @@ public class hyperlinkScript : MonoBehaviour {
                         int.TryParse(parameters[1], out temp);
                         for (int i = 0; i < temp; i++)
                         {
-                            if (parameters[0].ToLower().Equals("left"))
+                            if (parameters[0].ToLowerInvariant().Equals("left"))
                             {
                                 if (currentScreen == 0)
                                 {
@@ -878,7 +829,7 @@ public class hyperlinkScript : MonoBehaviour {
                                 Arrows[0].OnInteract();
                                 Arrows[0].OnInteractEnded();
                             }
-                            else if (parameters[0].ToLower().Equals("right"))
+                            else if (parameters[0].ToLowerInvariant().Equals("right"))
                             {
                                 if (currentScreen == 10)
                                 {
@@ -892,7 +843,7 @@ public class hyperlinkScript : MonoBehaviour {
                     }
                     else
                     {
-                        yield return "sendtochaterror '" + parameters[1] + "' is not a valid number! Numbers 1-10 are valid for scrolling.";
+                        yield return string.Format("sendtochaterror '{0}' is not a valid number! Numbers 1-10 are valid for scrolling.", parameters[1]);
                     }
                 }
             }
@@ -917,10 +868,10 @@ public class hyperlinkScript : MonoBehaviour {
                     module += parameters[i] + " ";
                 }
                 module = module.Trim();
-                module = module.ToLower();
+                module = module.ToLowerInvariant();
                 if (!listContains(module))
                 {
-                    string modname = Back.GetComponent<Renderer>().material.name.ToLower();
+                    string modname = Back.GetComponent<Renderer>().material.name.ToLowerInvariant();
                     modname = modname.Replace(" (instance)", "");
                     int rando = Random.Range(0, 2);
                     int counter = 0;
@@ -928,13 +879,13 @@ public class hyperlinkScript : MonoBehaviour {
                     {
                         Arrows[rando].OnInteract();
                         Arrows[rando].OnInteractEnded();
-                        modname = Back.GetComponent<Renderer>().material.name.ToLower();
+                        modname = Back.GetComponent<Renderer>().material.name.ToLowerInvariant();
                         modname = modname.Replace(" (instance)", "");
                         yield return new WaitForSeconds(0.05f);
                         counter++;
                         if (counter == 121)
                         {
-                            yield return "sendtochaterror '" + module + "' is not a valid module name!";
+                            yield return string.Format("sendtochaterror '{0}' is not a valid module name!", module);
                             yield break;
                         }
                     }
@@ -944,7 +895,7 @@ public class hyperlinkScript : MonoBehaviour {
                     int ctleft = 0;
                     int ctright = 0;
                     int curindex = 121;
-                    while (!module.Equals(IDList.phrases[curindex].ToLower()))
+                    while (!module.Equals(IDList.phrases[curindex].ToLowerInvariant()))
                     {
                         curindex -= 2;
                         if (curindex < 1)
@@ -952,7 +903,7 @@ public class hyperlinkScript : MonoBehaviour {
                         ctleft++;
                     }
                     curindex = 121;
-                    while (!module.Equals(IDList.phrases[curindex].ToLower()))
+                    while (!module.Equals(IDList.phrases[curindex].ToLowerInvariant()))
                     {
                         curindex += 2;
                         if (curindex > 245)
@@ -998,6 +949,6 @@ public class hyperlinkScript : MonoBehaviour {
     //tp force solve handler
     IEnumerator TwitchHandleForcedSolve()
     {
-        yield return ProcessTwitchCommand("submit "+ IDList.phrases[anchor + 1]);
+        yield return ProcessTwitchCommand(string.Format("submit {0}", IDList.phrases[moduleIndex]));
     }
 }
