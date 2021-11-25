@@ -14,7 +14,7 @@ public class hyperlinkWebSocketManager
 		StartThread();
 	}
 
-	private static readonly string WebSocketURL = "ws://hyperlink-websocketserver.herokuapp.com/";
+	private static readonly string WebSocketURL = "ws://hlserver.marksam.net";
 	private bool shouldBeRunning = true;
 
 	private void StartThread()
