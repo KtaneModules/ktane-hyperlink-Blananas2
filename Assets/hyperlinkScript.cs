@@ -231,7 +231,7 @@ public class hyperlinkScript : MonoBehaviour {
         {
             Debug.LogFormat("[The Hyperlink #{0}] Encoding {1}: '{2}' in {3} => '{4}' => {5}", moduleId, a + 1, screwList[a].Replace("\n", ""), encodings[index[a]], charList[a].Replace("\n", ""), selectedString[a] );
         }
-        Debug.LogFormat("[The Hyperlink #{0}] Link {3}{1} references {2}.", moduleId, selectedString, IDList.phrases[moduleIndex], error ? "https://www.youtube.com/watch?v=" : "https://hyperlink.marksam.net/?link=");
+        Debug.LogFormat("[The Hyperlink #{0}] Link {3}{1} references {2}.", moduleId, selectedString, IDList.phrases[moduleIndex], error ? "https://www.youtube.com/watch?v=" : "https://hyperlink.eltrick.uk/");
         interactable = true;
         Circle.GetComponent<MeshRenderer>().material = OtherMats[0];
         Arrows[1].GetComponent<MeshRenderer>().material = OtherMats[0];

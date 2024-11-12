@@ -14,7 +14,7 @@ public class hyperlinkWebSocketManager
 		StartThread();
 	}
 
-	private static readonly string WebSocketURL = "ws://hlserver.marksam.net";
+	private static readonly string WebSocketURL = "ws://hyperlink.eltrick.uk:2999";
 	private bool shouldBeRunning = true;
 
 	private void StartThread()
